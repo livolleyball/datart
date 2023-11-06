@@ -348,11 +348,12 @@ public class JdbcDataProvider extends DataProvider {
     @Override
     public void resetSource(DataProviderSource source) {
         try {
-            JdbcDataProviderAdapter adapter = cachedProviders.remove(source.getSourceId());
-            if (adapter != null) {
-                adapter.close();
-            }
+            // JdbcDataProviderAdapter adapter = cachedProviders.remove(source.getSourceId());
+            // if (adapter != null) {
+            //     adapter.close();
+            // }
             log.info("jdbc source '{}-{}' updated, source has been reset", source.getSourceId(), source.getName());
+
         } catch (Exception e) {
             log.error("source reset error.", e);
         }

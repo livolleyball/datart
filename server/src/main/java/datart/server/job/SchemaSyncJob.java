@@ -37,6 +37,7 @@ import org.springframework.transaction.TransactionStatus;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -72,6 +73,7 @@ public class SchemaSyncJob implements Job, Closeable {
             execute(sourceId);
         } catch (Exception e) {
             log.error("source schema sync error ", e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -79,24 +81,33 @@ public class SchemaSyncJob implements Job, Closeable {
         List<SchemaItem> schemaItems = new LinkedList<>();
         DataProviderService dataProviderService = Application.getBean(DataProviderService.class);
         Set<String> databases = dataProviderService.readAllDatabases(sourceId);
-        if (CollectionUtils.isNotEmpty(databases)) {
-            for (String database : databases) {
-                SchemaItem schemaItem = new SchemaItem();
-                schemaItems.add(schemaItem);
-                schemaItem.setDbName(database);
-                schemaItem.setTables(new LinkedList<>());
-                Set<String> tables = dataProviderService.readTables(sourceId, database);
-                if (CollectionUtils.isNotEmpty(tables)) {
-                    for (String table : tables) {
-                        TableInfo tableInfo = new TableInfo();
-                        schemaItem.getTables().add(tableInfo);
-                        tableInfo.setTableName(table);
-                        tableInfo.setColumns(dataProviderService.readTableColumns(sourceId, database, table));
+
+        try {
+            if (CollectionUtils.isNotEmpty(databases)) {
+                for (String database : databases) {
+                    if (true) {
+                        SchemaItem schemaItem = new SchemaItem();
+                        schemaItems.add(schemaItem);
+                        schemaItem.setDbName(database);
+                        schemaItem.setTables(new LinkedList<>());
+                        Set<String> tables = dataProviderService.readTables(sourceId, database);
+                        if (CollectionUtils.isNotEmpty(tables)) {
+                            for (String table : tables) {
+                                log.info("now is Sync {}.{}", database, table);
+                                TableInfo tableInfo = new TableInfo();
+                                schemaItem.getTables().add(tableInfo);
+                                tableInfo.setTableName(table);
+                                tableInfo.setColumns(dataProviderService.readTableColumns(sourceId, database, table));
+                            }
+                        }
                     }
                 }
             }
+            return upsertSchemaInfo(sourceId, schemaItems);
+        } catch (Exception e) {
+            log.error("获取schema元数据出错 {}" ,e.getMessage());
+            return false;
         }
-        return upsertSchemaInfo(sourceId, schemaItems);
     }
 
     private boolean upsertSchemaInfo(String sourceId, List<SchemaItem> schemaItems) {

@@ -53,7 +53,10 @@ public class DataTypeUtils {
     public static ValueType jdbcType2DataType(int jdbcType) {
         SqlTypeName sqlTypeName = SqlTypeName.getNameForJdbcType(jdbcType);
         SqlTypeFamily family;
-        if (sqlTypeName == null) {
+        if (sqlTypeName == null && jdbcType == 1111) {
+            // TODO  hologres jsonb 类型的 jdbcType=1111 ,兼容成 varchar jdbcType=1111
+            family = SqlTypeFamily.getFamilyForJdbcType(12);
+        } else if (sqlTypeName == null) {
             family = SqlTypeFamily.getFamilyForJdbcType(jdbcType);
         } else {
             family = sqlTypeName.getFamily();

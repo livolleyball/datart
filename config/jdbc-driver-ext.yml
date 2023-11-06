@@ -47,3 +47,20 @@ STARROCKS:
   url-prefix: "jdbc:mysql://"
 
 
+ODPS:
+  db-type: "ODPS"
+  name: "odps"
+  literal-quote: "'"
+  identifier-quote: "`"
+  literal-end-quote: "'"
+  identifier-end-quote: "`"
+  driver-class: "com.aliyun.odps.jdbc.OdpsDriver"
+  url-prefix: "jdbc:odps:"
+  quote-identifiers:
+  sql-dialect:
+  adapter-class:
+  support-sql-limit:
+
+
+BIG_QUERY:
+  quote-identifiers: false
